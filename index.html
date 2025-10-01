@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .form-container { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        .hidden-form { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .visible-form { opacity: 1; transform: scale(1); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Main Application Container -->
+    <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="hidden fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        </div>
+
+        <!-- =================================================================
+             AUTHENTICATION PAGE (LOGIN & REGISTER)
+        ================================================================== -->
+        <div id="auth-page">
+            <div class="max-w-md mx-auto mt-10">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div id="auth-forms-wrapper" class="relative">
+                        <!-- Login Form -->
+                        <div id="login-form-container" class="form-container visible-form">
+                            <h2 class="text-2xl font-bold text-center text-gray-800 mb-1">Welcome Back!</h2>
+                            <p class="text-center text-gray-500 mb-6">Sign in to continue.</p>
+                            <form id="login-form" class="space-y-4">
+                                <div>
+                                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                                    <input type="email" id="login-email" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                                    <input type="password" id="login-password" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Login</button>
+                            </form>
+                            <p class="text-center mt-6 text-sm">No account yet? <button id="show-register" class="font-medium text-blue-600 hover:text-blue-500">Register</button></p>
+                        </div>
+
+                        <!-- Registration Form -->
+                        <div id="register-form-container" class="form-container hidden-form absolute top-0 left-0 w-full">
+                            <h2 class="text-2xl font-bold text-center text-gray-800 mb-1">Create an Account</h2>
+                             <p class="text-center text-gray-500 mb-6">Get started with Notes Marketplace.</p>
+                            <form id="register-form" class="space-y-4">
+                                <div>
+                                    <label for="register-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                    <input type="text" id="register-name" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label for="register-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                                    <input type="email" id="register-email" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label for="register-password" class="block text-sm font-medium text-gray-700">Password</label>
+                                    <input type="password" id="register-password" required class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Register as a...</label>
+                                    <select id="register-role" class="mt-1 block w-full pl-3 pr-10 py-2 bg-gray-50 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <option value="buyer">Buyer</option>
+                                        <option value="seller">Seller</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Create Account</button>
+                            </form>
+                            <p class="text-center mt-6 text-sm">Already a member? <button id="show-login" class="font-medium text-blue-600 hover:text-blue-500">Login</button></p>
+                        </div>
+                    </div>
+                     <p id="auth-message" class="mt-4 text-center text-sm text-red-600 h-4"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Universal Header for Dashboards -->
+        <header id="dashboard-header" class="hidden justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-lg">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-blue-600">Notes Marketplace</h1>
+                <p class="text-gray-600 text-sm sm:text-base">Welcome, <span id="user-name" class="font-semibold"></span>!</p>
+            </div>
+            <button id="logout-button" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none">Logout</button>
+        </header>
+
+        <!-- =================================================================
+             BUYER DASHBOARD
+        ================================================================== -->
+        <div id="buyer-dashboard" class="hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Notes for Sale</h2>
+            <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Note cards will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- =================================================================
+             SELLER DASHBOARD
+        ================================================================== -->
+        <div id="seller-dashboard" class="hidden">
+             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h2 class="text-2xl font-bold mb-4">Upload New Note</h2>
+                        <form id="upload-note-form" class="space-y-4">
+                            <div>
+                                <label for="note-title" class="block text-sm font-medium text-gray-700">Title</label>
+                                <input type="text" id="note-title" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="note-subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                                <input type="text" id="note-subject" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="note-description" class="block text-sm font-medium text-gray-700">Description</label>
+                                <textarea id="note-description" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="note-price" class="block text-sm font-medium text-gray-700">Price (INR)</label>
+                                <input type="number" id="note-price" step="1" min="0" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <p class="text-xs text-gray-500">File upload is simulated. A placeholder link will be used.</p>
+                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Upload Note</button>
+                        </form>
+                        <p id="upload-message" class="mt-4 text-center text-sm h-4"></p>
+                    </div>
+                </div>
+                 <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold mb-4">Your Uploads</h2>
+                     <p class="text-center text-gray-500 mt-10">This feature will show your note history in a future version.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- =================================================================
+             ADMIN DASHBOARD
+        ================================================================== -->
+        <div id="admin-dashboard" class="hidden">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Pending Approvals</h2>
+            <div id="pending-notes-list" class="space-y-4">
+                <!-- Pending notes will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIG & STATE ---
+        const API_URL = 'http://127.0.0.1:5000';
+        let currentUser = null;
+
+        // --- DOM ELEMENTS ---
+        const pages = {
+            auth: document.getElementById('auth-page'),
+            buyer: document.getElementById('buyer-dashboard'),
+            seller: document.getElementById('seller-dashboard'),
+            admin: document.getElementById('admin-dashboard'),
+        };
+        const dashboardHeader = document.getElementById('dashboard-header');
+        const loadingSpinner = document.getElementById('loading');
+        
+        // Auth form elements
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const authMessage = document.getElementById('auth-message');
+        const showRegisterBtn = document.getElementById('show-register');
+        const showLoginBtn = document.getElementById('show-login');
+        const loginFormContainer = document.getElementById('login-form-container');
+        const registerFormContainer = document.getElementById('register-form-container');
+
+        // Dashboard elements
+        const userNameSpan = document.getElementById('user-name');
+        const logoutButton = document.getElementById('logout-button');
+        const notesGrid = document.getElementById('notes-grid');
+        const uploadNoteForm = document.getElementById('upload-note-form');
+        const uploadMessage = document.getElementById('upload-message');
+        const pendingNotesList = document.getElementById('pending-notes-list');
+
+        // --- HELPER FUNCTIONS ---
+
+        const showLoading = (show) => {
+            loadingSpinner.classList.toggle('hidden', !show);
+        };
+
+        const showPage = (pageKey) => {
+            Object.values(pages).forEach(page => page.classList.add('hidden'));
+            if (pages[pageKey]) pages[pageKey].classList.remove('hidden');
+            
+            dashboardHeader.classList.toggle('hidden', pageKey === 'auth');
+            dashboardHeader.classList.toggle('flex', pageKey !== 'auth');
+        };
+
+        const apiRequest = async (endpoint, method = 'GET', body = null) => {
+            showLoading(true);
+            try {
+                const options = {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                };
+                if (body) options.body = JSON.stringify(body);
+
+                const response = await fetch(`${API_URL}${endpoint}`, options);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                }
+                return data;
+            } catch (error) {
+                console.error('API Request Error:', error);
+                throw error;
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        const saveUserAndRedirect = (userData) => {
+            currentUser = userData;
+            localStorage.setItem('user', JSON.stringify(currentUser));
+            userNameSpan.textContent = currentUser.name;
+            showDashboardForRole(currentUser.role);
+        };
+        
+        // --- PAGE/COMPONENT RENDERING ---
+
+        const showDashboardForRole = (role) => {
+            // Special case for admin user
+            if (currentUser.email === 'admin@example.com') {
+                showPage('admin');
+                fetchPendingNotes();
+                return;
+            }
+
+            if (role === 'buyer') {
+                showPage('buyer');
+                fetchApprovedNotes();
+            } else if (role === 'seller') {
+                showPage('seller');
+            } else {
+                handleLogout(); // Fallback for unknown role
+            }
+        };
+        
+        const renderApprovedNotes = (notes) => {
+            notesGrid.innerHTML = '';
+            if (!notes || notes.length === 0) {
+                notesGrid.innerHTML = '<p class="text-gray-500 col-span-full text-center bg-white p-10 rounded-xl shadow-lg">No notes are available for purchase right now.</p>';
+                return;
+            }
+            notes.forEach(note => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <p class="text-sm font-medium text-blue-600">${note.subject.toUpperCase()}</p>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1">${note.title}</h3>
+                        <p class="text-gray-600 mt-2 text-sm">${note.description || 'No description provided.'}</p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                        <p class="text-2xl font-bold text-gray-900">₹${note.price.toFixed(2)}</p>
+                        <button data-note-id="${note.note_id}" class="purchase-btn py-2 px-4 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Buy Now</button>
+                    </div>
+                `;
+                notesGrid.appendChild(card);
+            });
+        };
+
+        const renderPendingNotes = (notes) => {
+            pendingNotesList.innerHTML = '';
+            if (!notes || notes.length === 0) {
+                pendingNotesList.innerHTML = '<p class="text-gray-500 text-center bg-white p-10 rounded-xl shadow-lg">No notes are currently pending approval.</p>';
+                return;
+            }
+            notes.forEach(note => {
+                const item = document.createElement('div');
+                item.className = 'bg-white rounded-xl shadow-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center';
+                item.innerHTML = `
+                    <div class="mb-4 sm:mb-0">
+                        <h4 class="font-bold text-lg">${note.title}</h4>
+                        <p class="text-sm text-gray-600">Subject: ${note.subject} | Seller ID: ${note.seller_id}</p>
+                    </div>
+                    <div class="flex-shrink-0 space-x-2">
+                        <button data-note-id="${note.note_id}" class="approve-btn py-2 px-4 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">Approve</button>
+                        <button data-note-id="${note.note_id}" class="reject-btn py-2 px-4 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700">Reject</button>
+                    </div>
+                `;
+                pendingNotesList.appendChild(item);
+            });
+        };
+
+        // --- API CALLS ---
+        
+        const fetchApprovedNotes = async () => {
+            try {
+                const data = await apiRequest('/notes');
+                renderApprovedNotes(data.notes);
+            } catch (error) {
+                notesGrid.innerHTML = `<p class="text-red-500 col-span-full text-center">Error fetching notes: ${error.message}</p>`;
+            }
+        };
+
+        const fetchPendingNotes = async () => {
+            try {
+                const data = await apiRequest('/admin/notes/pending');
+                renderPendingNotes(data.pending_notes);
+            } catch (error) {
+                pendingNotesList.innerHTML = `<p class="text-red-500 text-center">Error fetching pending notes: ${error.message}</p>`;
+            }
+        };
+        
+        // --- EVENT HANDLERS ---
+        const handleLogin = async (e) => {
+            e.preventDefault();
+            authMessage.textContent = '';
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            try {
+                const data = await apiRequest('/login', 'POST', { email, password });
+                saveUserAndRedirect(data.user);
+            } catch (error) {
+                authMessage.textContent = error.message;
+            }
+        };
+
+        const handleRegister = async (e) => {
+            e.preventDefault();
+            authMessage.textContent = '';
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const role = document.getElementById('register-role').value;
+            try {
+                await apiRequest('/register', 'POST', { name, email, password, role });
+                // Automatically log in after successful registration
+                const data = await apiRequest('/login', 'POST', { email, password });
+                saveUserAndRedirect(data.user);
+            } catch (error) {
+                authMessage.textContent = error.message;
+            }
+        };
+
+        const handleLogout = () => {
+            currentUser = null;
+            localStorage.removeItem('user');
+            showPage('auth');
+        };
+        
+        const handleNoteUpload = async (e) => {
+            e.preventDefault();
+            uploadMessage.textContent = '';
+            const title = document.getElementById('note-title').value;
+            const subject = document.getElementById('note-subject').value;
+            const description = document.getElementById('note-description').value;
+            const price = parseFloat(document.getElementById('note-price').value);
+
+            try {
+                await apiRequest('/notes', 'POST', {
+                    title, subject, description, price,
+                    seller_id: currentUser.user_id,
+                });
+                uploadMessage.textContent = 'Note submitted for approval!';
+                uploadMessage.className = 'mt-4 text-center text-sm text-green-600';
+                uploadNoteForm.reset();
+            } catch (error) {
+                uploadMessage.textContent = `Upload failed: ${error.message}`;
+                uploadMessage.className = 'mt-4 text-center text-sm text-red-600';
+            }
+        };
+        
+        const handleDashboardClick = async (e) => {
+            const target = e.target;
+            const noteId = target.dataset.noteId;
+
+            if (!noteId) return;
+
+            if (target.classList.contains('purchase-btn')) {
+                if (!confirm('Confirm purchase?')) return;
+                try {
+                    await apiRequest('/purchase', 'POST', { note_id: noteId, buyer_id: currentUser.user_id });
+                    alert('Purchase successful!');
+                    target.textContent = 'Purchased';
+                    target.disabled = true;
+                    target.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    target.classList.add('bg-gray-400', 'cursor-not-allowed');
+                } catch (error) {
+                    alert(`Purchase failed: ${error.message}`);
+                }
+            } else if (target.classList.contains('approve-btn')) {
+                try {
+                    await apiRequest(`/admin/notes/${noteId}/approve`, 'PUT');
+                    fetchPendingNotes(); // Refresh the list
+                } catch (error) {
+                    alert(`Approval failed: ${error.message}`);
+                }
+            } else if (target.classList.contains('reject-btn')) {
+                try {
+                    await apiRequest(`/admin/notes/${noteId}/reject`, 'PUT');
+                    fetchPendingNotes(); // Refresh the list
+                } catch (error) {
+                    alert(`Rejection failed: ${error.message}`);
+                }
+            }
+        };
+
+        // --- INITIALIZATION ---
+        const init = () => {
+            loginForm.addEventListener('submit', handleLogin);
+            registerForm.addEventListener('submit', handleRegister);
+            logoutButton.addEventListener('click', handleLogout);
+            uploadNoteForm.addEventListener('submit', handleNoteUpload);
+
+            document.getElementById('buyer-dashboard').addEventListener('click', handleDashboardClick);
+            document.getElementById('admin-dashboard').addEventListener('click', handleDashboardClick);
+
+            showRegisterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginFormContainer.classList.remove('visible-form');
+                loginFormContainer.classList.add('hidden-form');
+                registerFormContainer.classList.remove('hidden-form');
+                registerFormContainer.classList.add('visible-form');
+            });
+            showLoginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                registerFormContainer.classList.remove('visible-form');
+                registerFormContainer.classList.add('hidden-form');
+                loginFormContainer.classList.remove('hidden-form');
+                loginFormContainer.classList.add('visible-form');
+            });
+            
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+                userNameSpan.textContent = currentUser.name;
+                showDashboardForRole(currentUser.role);
+            } else {
+                showPage('auth');
+            }
+        };
+
+        init();
+    });
+    </script>
+</body>
+</html>
+
